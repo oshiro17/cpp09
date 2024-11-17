@@ -39,5 +39,6 @@ class BitcoinExchange {
         std::map<std::string, double> _data;
         std::deque<std::pair<std::string, std::string> > _inputs;
 };
+bool isWhitespace(unsigned char c);
 
 #endif

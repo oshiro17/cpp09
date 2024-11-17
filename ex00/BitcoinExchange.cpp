@@ -43,22 +43,28 @@ bool BitcoinExchange::isDateValid(const std::string& date) {
     //     return false;
 
     int month, day;
-    try {
-        month = std::stoi(date.substr(5, 2));
-        day = std::stoi(date.substr(8, 2));
-    } catch (...) {
-        return false;
-    }
+    int year;
+    // try {
+        // month = std::stoi(date.substr(5, 2));
+        // day = std::stoi(date.substr(8, 2));
+        // year = std::stoi(date.substr(0, 4));
+    // } catch (...) {
+    //     return false;
+    // }
+    std::stringstream(date.substr(5,2)) >> month;
+	std::stringstream(date.substr(8,2)) >> day;
+	std::stringstream(date.substr(0,4)) >> year;
     static const int daysInMonth[] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
     int maxDay = daysInMonth[month - 1];
 
-    try {
-        if (month == 2 && ((std::stoi(date.substr(0, 4)) % 4 == 0 && std::stoi(date.substr(0, 4)) % 100 != 0) || std::stoi(date.substr(0, 4)) % 400 == 0)) {
-            maxDay = 29;
-        }
-    } catch (...) {
-        return false; 
-    }
+    // try {
+    if (month == 2 &&( (year % 4 == 0 && year % 100 != 0 )|| year % 400 == 0)) 
+        maxDay = 29;
+
+        // }
+    // } catch (...) {
+        // return false; 
+    // }
     
     // std::cout<<"73"<<std::endl;
     if (month < 1 || month > 12 || day < 1 || day > maxDay) {
@@ -154,9 +160,9 @@ std::map<std::string, double>::iterator BitcoinExchange::closestDate(const std::
     if (near == _data.end()) {
         return _data.begin();
     }
-    // if ( near->first > date) {
-    //     return _data.end();
-    // }
+    if ( near->first > date) {
+        return _data.end();
+    }
     return near;
 }
 

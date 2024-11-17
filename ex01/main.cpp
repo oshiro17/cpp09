@@ -42,16 +42,24 @@ int main(int argc, char **argv)
 
             operandStack.push(operationResult);
         } else {
-            try {
-                int number = std::stoi(token);
-                operandStack.push(number);
-            } catch (const std::invalid_argument &) {
-                std::cerr << "Error: Invalid token '" << token << "' in expression." << std::endl;
-                return 1;
-            } catch (const std::out_of_range &) {
-                std::cerr << "Error: Number out of range in token '" << token << "'." << std::endl;
-                return 1;
+            for(int i=0; token[i] !='\0'; i++) {
+                if(token[i] < 48 || token[i] > 57) {
+                    std::cout << "Error: bad input." << std::endl;
+                    return 1;
+                }
             }
+            int num = atoi(token.c_str());
+            operandStack.push(num);
+            // try {
+            //     int number = std::stoi(token);
+            //     operandStack.push(number);
+            // } catch (const std::invalid_argument &) {
+            //     std::cerr << "Error: Invalid token '" << token << "' in expression." << std::endl;
+            //     return 1;
+            // } catch (const std::out_of_range &) {
+            //     std::cerr << "Error: Number out of range in token '" << token << "'." << std::endl;
+            //     return 1;
+            // }
         }
     }
 

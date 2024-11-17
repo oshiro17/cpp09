@@ -158,7 +158,6 @@ std::map<std::string, double>::iterator BitcoinExchange::closestDate(const std::
     return near;
 }
 
-// 入力データを処理
 void BitcoinExchange::processEntry(const std::string& date, const std::string& rate) {
     if (!isDateValid(date)) {
         std::cout << "Invalid date format " << date << std::endl;

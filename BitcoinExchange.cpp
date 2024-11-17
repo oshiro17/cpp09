@@ -151,10 +151,12 @@ std::map<std::string, double>::iterator BitcoinExchange::closestDate(const std::
         near = it;
     }
 
-    if (near == _data.end() || near->first > date) {
-        std::cout << "cannot find the closest past date" << std::endl;
-        return _data.end();
+    if (near == _data.end()) {
+        return _data.begin();
     }
+    // if ( near->first > date) {
+    //     return _data.end();
+    // }
     return near;
 }
 

@@ -9,6 +9,7 @@
 #include <deque>
 #include <algorithm>
 #include <cctype>
+#include <cstdlib>
 
 // 定数の定義
 #define CSV_FILE "data.csv"             // CSVファイルの名前
@@ -42,3 +43,16 @@ class BitcoinExchange {
 bool isWhitespace(unsigned char c);
 
 #endif
+//挿入順: 10, 20, 30, 15, 25
+// 赤黒木の構造:std::map
+//         20 (黒)
+//        /    \
+//     10 (赤) 30 (黒)
+//        \
+//       15 (赤)
+//          \
+//          25 (赤)
+//重複を許さない
+// std::deque<std::pair<std::string, std::string> > _inputs;
+//メモリ再確保のオーバーヘッドが少ない。
+//両端での高速な挿入・削除操作。

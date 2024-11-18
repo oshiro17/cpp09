@@ -87,22 +87,29 @@ bool BitcoinExchange::isRateValid(const std::string& value, double& number) {
 bool isWhitespace(unsigned char c) {
     return std::isspace(c);
 }
-
 void BitcoinExchange::loadCSV() {
     std::ifstream csv_file(CSV_FILE);
+    if (!csv_file.is_open()) {
+        std::cerr << "Error: Could not open file => " << CSV_FILE << std::endl;
+        std::exit(1);
+    }
+
     std::string line;
+    bool hasContent = false; // ファイルが空かどうかを確認するフラグ
 
     while (std::getline(csv_file, line)) {
         line.erase(std::remove_if(line.begin(), line.end(), isWhitespace), line.end());
-        // line.erase(std::remove(line.begin(), line.end(), ' '), line.end());
-        // line.erase(std::remove(line.begin(), line.end(), '\t'), line.end());
-        //    std::cout << "Processed line: " << line << std::endl;
+
+        if (line.empty()) {
+            continue;
+        }
+        hasContent = true;
+
         std::size_t pos = line.find(',');
         if (pos != std::string::npos) {
             std::string date = line.substr(0, pos);
             std::string rate = line.substr(pos + 1);
-        //    std::cout << "Data " << date << std::endl;
-        //    std::cout << "rate " << rate << std::endl;
+
             if (date.empty()) {
                 std::cerr << "Error: Date is missing in line => " << line << std::endl;
                 std::exit(1);
@@ -111,22 +118,68 @@ void BitcoinExchange::loadCSV() {
                 std::cerr << "Error: Rate is missing in line => " << line << std::endl;
                 std::exit(1);
             }
+
             double value;
             std::istringstream iss(rate);
             iss >> value;
-            // キーが存在していない時_data.find(date) の帰り値は_data.end())
+
             if (line != FIRST_CSV_LINE && (iss.fail() || !isDateValid(date) || _data.find(date) != _data.end())) {
-                std::cout << "Invalid csv line => " << line << std::endl;
-		        std::exit(1);
+                std::cerr << "Error: Invalid csv line => " << line << std::endl;
+                std::exit(1);
             } else {
                 _data[date] = value;
             }
         } else {
-            std::cerr << "Error: Date is missing in line => " << line << std::endl;
+            std::cerr << "Error: Invalid line format, missing ',' => " << line << std::endl;
             std::exit(1);
         }
     }
+
+    if (!hasContent) { // ファイル全体が空、または空行や空白行のみの場合
+        std::cerr << "Error: CSV file is empty or contains only blank/invalid lines => " << CSV_FILE << std::endl;
+        std::exit(1);
+    }
 }
+
+// void BitcoinExchange::loadCSV() {
+//     std::ifstream csv_file(CSV_FILE);
+//     std::string line;
+
+//     while (std::getline(csv_file, line)) {
+//         line.erase(std::remove_if(line.begin(), line.end(), isWhitespace), line.end());
+//         // line.erase(std::remove(line.begin(), line.end(), ' '), line.end());
+//         // line.erase(std::remove(line.begin(), line.end(), '\t'), line.end());
+//         //    std::cout << "Processed line: " << line << std::endl;
+//         std::size_t pos = line.find(',');
+//         if (pos != std::string::npos) {
+//             std::string date = line.substr(0, pos);
+//             std::string rate = line.substr(pos + 1);
+//         //    std::cout << "Data " << date << std::endl;
+//         //    std::cout << "rate " << rate << std::endl;
+//             if (date.empty()) {
+//                 std::cerr << "Error: Date is missing in line => " << line << std::endl;
+//                 std::exit(1);
+//             }
+//             if (rate.empty()) {
+//                 std::cerr << "Error: Rate is missing in line => " << line << std::endl;
+//                 std::exit(1);
+//             }
+//             double value;
+//             std::istringstream iss(rate);
+//             iss >> value;
+//             // キーが存在していない時_data.find(date) の帰り値は_data.end())
+//             if (line != FIRST_CSV_LINE && (iss.fail() || !isDateValid(date) || _data.find(date) != _data.end())) {
+//                 std::cout << "Invalid csv line => " << line << std::endl;
+// 		        std::exit(1);
+//             } else {
+//                 _data[date] = value;
+//             }
+//         } else {
+//             std::cerr << "Error: Date is missing in line => " << line << std::endl;
+//             std::exit(1);
+//         }
+//     }
+// }
 
 void BitcoinExchange::loadInput(const char *filename) {
     std::ifstream ifile(filename);
@@ -178,6 +231,8 @@ std::map<std::string, double>::iterator BitcoinExchange::closestDate(const std::
 //     }
 
 //     std::map<std::string, double>::iterator it = closestDate(date);
+//             std::cout  << number << std::endl;
+//                      std::cout << it->second << std::endl;
 //     if (it != _data.end()) {
 //         std::cout << date << " => " << rate << " = " << number * it->second << std::endl;
 //     }

@@ -166,6 +166,22 @@ std::map<std::string, double>::iterator BitcoinExchange::closestDate(const std::
     return near;
 }
 
+// void BitcoinExchange::processEntry(const std::string& date, const std::string& rate) {
+//     if (!isDateValid(date)) {
+//         std::cout << "Invalid date format " << date << std::endl;
+//         return;
+//     }
+
+//     double number;
+//     if (!isRateValid(rate, number)) {
+//         return;
+//     }
+
+//     std::map<std::string, double>::iterator it = closestDate(date);
+//     if (it != _data.end()) {
+//         std::cout << date << " => " << rate << " = " << number * it->second << std::endl;
+//     }
+// }
 void BitcoinExchange::processEntry(const std::string& date, const std::string& rate) {
     if (!isDateValid(date)) {
         std::cout << "Invalid date format " << date << std::endl;
@@ -179,10 +195,17 @@ void BitcoinExchange::processEntry(const std::string& date, const std::string& r
 
     std::map<std::string, double>::iterator it = closestDate(date);
     if (it != _data.end()) {
-        std::cout << date << " => " << rate << " = " << number * it->second << std::endl;
+        double conversionRate = it->second;
+        if (number > 0 && conversionRate > 0) {
+            if (number > std::numeric_limits<double>::max() / conversionRate) {
+                std::cout << "Overflow detected: " << number << " * " << conversionRate << " exceeds the limit." << std::endl;
+                return;
+            }
+        }
+
+        std::cout << date << " => " << rate << " = " << number * conversionRate << std::endl;
     }
 }
-
 void BitcoinExchange::process() {
     typedef std::pair<std::string, std::string> InputPair;
     typedef std::deque<InputPair>::const_iterator InputIterator;

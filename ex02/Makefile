@@ -2,7 +2,7 @@
 NAME = PmergeMe
 
 # ソースファイル一覧
-SRC = main.cpp 
+SRC = main.cpp PmergeMe.cpp 
 
 # フラグ
 CXXFLAGS = -Wall -Wextra -Werror -std=c++98 -I./include

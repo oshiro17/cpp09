@@ -6,6 +6,7 @@
 #include <climits> // For INT_MAX
 #include <list>
 #include "PmergeMe.hpp"
+#define DEBUG_LINE() std::cerr << "Reached line " << __LINE__ << std::endl;
 
 unsigned long jacobsthal(unsigned long i) {
     static std::vector<unsigned long> buf; 
@@ -26,76 +27,66 @@ unsigned long jacobsthal(unsigned long i) {
     return buf[i];
 }
 //J(n) = 2 * J(n-2) + J(n-1)
-
-
+void printData(const std::vector<int> &data) {
+    for (size_t i = 0; i < data.size(); ++i) {
+        std::cout << data[i];
+        if (i != data.size() - 1)
+            std::cout << " ";
+    }
+    std::cout << std::endl;
+}
 
 void mergeInsertSortVector(std::vector<int> &data) {
-    if (data.size() < 2)
-        return;
-
-    // Node ベースのデータ構造を作成
     std::vector<Node> large, small;
     large.reserve(data.size() / 2);
     small.reserve(data.size() / 2 + data.size() % 2);
-
-    for (std::vector<int>::iterator it = data.begin(); it != data.end();) {
+    for (std::vector<int>::iterator it = data.begin(); it != data.end(); ++it)
+    {
         std::vector<int>::iterator pre = it++;
-        if (it == data.end()) {
-            small.emplace_back(&*pre);
-            break;
+        if (it == data.end())
+        {
+            small.push_back(Node(&(*pre)));
         }
-        bool isLess = *pre < *it;
-        large.emplace_back(isLess ? &*it : &*pre);
-        small.emplace_back(isLess ? &*pre : &*it);
-        large.back().push(&small.back());
-    }
-    mergeInsertSortVector(data); 
-
-    std::vector<Node> tmp;
-    tmp.reserve(data.size());
-
-    bool finished = false;
-    std::vector<Node>::iterator it = large.begin();
-
-    tmp.push_back(*it->pop());
-    tmp.push_back(*it++);
-    for (std::size_t n = 1; !finished; ++n) {
-        for (std::size_t j = 2 * jacobsthal(n); j > 0; --j) {
-            if (it == large.end()) {
-                if (data.size() % 2) {
-                    Node &node = small.back();
-                    tmp.insert(std::lower_bound(tmp.begin(), tmp.end(), node), node);
-                }
-                finished = true;
-                break;
-            }
-            tmp.push_back(*it++);
+        if (*pre < *it)
+        {
+            small.push_back(Node(&(*pre)));
+            large.push_back(Node(&(*it)));
         }
-
-        for (std::vector<Node>::reverse_iterator jt = tmp.rbegin(); jt != tmp.rend();) {
-            if (jt->hasPair()) {
-                Node &node = *jt->pop();
-                tmp.insert(std::lower_bound(tmp.begin(), --jt.base(), node), node);
-            } else {
-                ++jt;
-            }
+        else
+        {
+            small.push_back(Node(&(*it)));
+            large.push_back(Node(&(*pre)));
         }
     }
+    sort(large);
+}
 
-    std::vector<int> res;
-    res.reserve(data.size());
-    for (std::vector<Node>::iterator it = tmp.begin(); it != tmp.end(); ++it) {
-        int *value = nullptr; 
-        it->getValue(value);
-
-        if (value) { 
-            res.push_back(*value);
-        } else {
-            std::cerr << "Error: Null pointer encountered in Node.getValue()\n";
+void sort(std::vector<Node> &data)
+{
+    printData(data);
+     std::vector<Node> large, small;
+    large.reserve(data.size() / 2);
+    small.reserve(data.size() / 2 + data.size() % 2);
+    for (std::vector<int>::iterator it = data.begin(); it != data.end(); ++it)
+    {
+        std::vector<int>::iterator pre = it++;
+        if (it == data.end())
+        {
+            small.push_back(Node(&(*pre)));
+        }
+        if (*pre < *it)
+        {
+            small.push_back(Node(&(*pre)));
+            large.push_back(Node(&(*it)));
+        }
+        else
+        {
+            small.push_back(Node(&(*it)));
+            large.push_back(Node(&(*pre)));
         }
     }
-
-    data.swap(res);
+    sort(large);
+     
 }
 
 
@@ -128,6 +119,7 @@ int main(int argc, char** argv) {
     std::cout << "\n";
 
     clock_t startVec = clock();
+    
     mergeInsertSortVector(vec);
     clock_t endVec = clock();
     double timeVec = static_cast<double>(endVec - startVec) / CLOCKS_PER_SEC * 1000000; // Microseconds

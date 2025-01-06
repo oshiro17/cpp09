@@ -2,10 +2,10 @@
 NAME = PmergeMe
 
 # ソースファイル一覧
-SRC = main.cpp PmergeMe.cpp 
+SRC = main.cpp PmergeMe.cpp
 
 # フラグ
-CXXFLAGS = -Wall -Wextra -Werror -std=c++98 -I./include
+CXXFLAGS = -Wall -Wextra -Werror -std=c++11 -I./include
 DEBUGFLAGS = -g -ggdb -fsanitize=address -fno-omit-frame-pointer
 ifneq ($(shell uname), Darwin)
     DEBUGFLAGS += -fstack-usage

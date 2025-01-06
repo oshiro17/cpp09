@@ -86,14 +86,14 @@ public:
 };
 
 // データを出力する関数
-template <typename ConstIterator>
-void printData(ConstIterator begin, ConstIterator end) {
-  if (begin != end) {
-    std::cout << *begin;
-    while (++begin != end)
-      std::cout << " " << *begin;
-  }
-  std::cout << std::endl;
-}
+
+// void printData(ConstIterator begin, ConstIterator end) {
+//   if (begin != end) {
+//     std::cout << *begin;
+//     while (++begin != end)
+//       std::cout << " " << *begin;
+//   }
+//   std::cout << std::endl;
+// };
 
 #endif

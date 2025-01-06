@@ -27,13 +27,47 @@ unsigned long jacobsthal(unsigned long i) {
     return buf[i];
 }
 //J(n) = 2 * J(n-2) + J(n-1)
-void printData(const std::vector<int> &data) {
+void printData(const std::vector<Node> &data) {
     for (size_t i = 0; i < data.size(); ++i) {
-        std::cout << data[i];
+        std::cout << data[i].getTypical();
         if (i != data.size() - 1)
             std::cout << " ";
     }
     std::cout << std::endl;
+}
+
+void sort(std::vector<Node> &data)
+{
+    if (data.size() == 1)
+        return;
+    printData(data);
+    //でばぐ
+     std::vector<Node> large, small;
+    large.reserve(data.size() / 2);
+    small.reserve(data.size() / 2 + data.size() % 2);
+    for (std::vector<Node>::iterator it = data.begin(); it != data.end(); ++it)
+    {
+        DEBUG_LINE();
+        std::vector<Node>::iterator pre = it;
+        pre++;
+        if (pre == data.end())
+        {
+            small.push_back(Node(&(*pre)));
+            break;
+        }
+        if (*pre < *it)
+        {
+            small.push_back(Node(&(*pre)));
+            large.push_back(Node(&(*it)));
+        }
+        else
+        {
+            small.push_back(Node(&(*it)));
+            large.push_back(Node(&(*pre)));
+        }
+    }
+    DEBUG_LINE();
+    sort(large);
 }
 
 void mergeInsertSortVector(std::vector<int> &data) {
@@ -42,10 +76,13 @@ void mergeInsertSortVector(std::vector<int> &data) {
     small.reserve(data.size() / 2 + data.size() % 2);
     for (std::vector<int>::iterator it = data.begin(); it != data.end(); ++it)
     {
-        std::vector<int>::iterator pre = it++;
-        if (it == data.end())
+       DEBUG_LINE();
+        std::vector<int>::iterator pre = it;
+        pre++;
+        if (pre == data.end())
         {
             small.push_back(Node(&(*pre)));
+            break;
         }
         if (*pre < *it)
         {
@@ -59,34 +96,6 @@ void mergeInsertSortVector(std::vector<int> &data) {
         }
     }
     sort(large);
-}
-
-void sort(std::vector<Node> &data)
-{
-    printData(data);
-     std::vector<Node> large, small;
-    large.reserve(data.size() / 2);
-    small.reserve(data.size() / 2 + data.size() % 2);
-    for (std::vector<int>::iterator it = data.begin(); it != data.end(); ++it)
-    {
-        std::vector<int>::iterator pre = it++;
-        if (it == data.end())
-        {
-            small.push_back(Node(&(*pre)));
-        }
-        if (*pre < *it)
-        {
-            small.push_back(Node(&(*pre)));
-            large.push_back(Node(&(*it)));
-        }
-        else
-        {
-            small.push_back(Node(&(*it)));
-            large.push_back(Node(&(*pre)));
-        }
-    }
-    sort(large);
-     
 }
 
 

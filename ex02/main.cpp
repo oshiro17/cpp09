@@ -122,11 +122,11 @@ void sort(std::vector<int> &data)
 
     for (std::size_t n = 1; flag; n++)
     {
-        // std::size_t j = 2 * jacobsthal(n);
+        std::size_t j = jacobsthal(n);
 
-        // jacobsthalとか使わずのでばぐ
-        std::size_t j= 1;
-        (void)n;
+        // // jacobsthalとか使わずのでばぐ
+        // std::size_t j= 1;
+        // (void)n;
 
         std::size_t i = 0;
 
@@ -176,8 +176,8 @@ int main(int argc, char** argv) {
 
         vec.push_back(static_cast<int>(num));
     }
-     std::cout << "jacobsthalとか使わず" << std::endl;
-    //  std::cout << "jacobsthal使って" << std::endl;
+    //  std::cout << "jacobsthalとか使わず" << std::endl;
+     std::cout << "jacobsthal使って" << std::endl;
 
     // std::cout << "Before: ";
     // for (size_t i = 0; i < vec.size(); ++i)

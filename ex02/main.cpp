@@ -4,7 +4,7 @@
 #include <cstdlib>
 #include <ctime>
 #include <climits> // For INT_MAX
-#include <list>
+#include <vector>
 #include "PmergeMe.hpp"
 #define DEBUG_LINE() std::cerr << "Reached line " << __LINE__ << std::endl;
 
@@ -27,81 +27,126 @@ unsigned long jacobsthal(unsigned long i) {
     return buf[i];
 }
 //J(n) = 2 * J(n-2) + J(n-1)
-void printData(const std::vector<Node> &data) {
-    for (size_t i = 0; i < data.size(); ++i) {
-        std::cout << data[i].getTypical();
-        if (i != data.size() - 1)
-            std::cout << " ";
-    }
-    std::cout << std::endl;
-}
+// void printData(const std::vector<Node> &data) {
+//     for (size_t i = 0; i < data.size(); ++i) {
+//         std::cout << data[i].getTypical();
+//         if (i != data.size() - 1)
+//             std::cout << " ";
+//     }
+//     std::cout << std::endl;
+// }
 
-void sort(std::vector<Node> &data)
+void sort(std::vector<int> &data)
 {
-    if (data.size() == 1)
+    if(data.size() <= 1)
         return;
-    printData(data);
-    //でばぐ
-     std::vector<Node> large, small;
-    large.reserve(data.size() / 2);
-    small.reserve(data.size() / 2 + data.size() % 2);
-    for (std::vector<Node>::iterator it = data.begin(); it != data.end(); ++it)
-    {
-        DEBUG_LINE();
-        std::vector<Node>::iterator pre = it;
-        pre++;
-        if (pre == data.end())
-        {
-            small.push_back(Node(&(*pre)));
-            break;
-        }
-        if (*pre < *it)
-        {
-            small.push_back(Node(&(*pre)));
-            large.push_back(Node(&(*it)));
-        }
-        else
-        {
-            small.push_back(Node(&(*it)));
-            large.push_back(Node(&(*pre)));
-        }
+    std::vector<int> large;
+    int smallArr[(data.size() / 2) + (data.size() % 2)];
+    std::vector<Node*> nodes;
+    int i = 0;
+for (std::vector<int>::iterator it = data.begin(); it != data.end(); )
+{
+    std::vector<int>::iterator pre = it + 1;
+    if (pre == data.end()) {
+        // 奇数個の最後の1つが余った場合、smallに入れる
+        smallArr[i] = *it;
+        i++;
+        break; // ループ終了
     }
-    DEBUG_LINE();
-    sort(large);
+
+    // ここで 2つ1組の比較
+    if (*pre < *it)
+    {
+        // small = *pre, large = *it
+        smallArr[i] = *pre;
+        large.push_back(*it);
+
+        // Nodeを作り、pop先として smallArr[i] のアドレスを設定
+        Node* newNode = new Node(*it);
+        newNode->pop = &smallArr[i];
+
+        nodes.push_back(newNode);
+    }
+    else
+    {
+        // small = *it, large = *pre
+        smallArr[i] = *it;
+        large.push_back(*pre);
+
+        Node* newNode = new Node(*pre);
+        newNode->pop = &smallArr[i];
+
+        nodes.push_back(newNode);
+    }
+
+    i++;
+    it += 2; // ペアを1つ消費
 }
 
-void mergeInsertSortVector(std::vector<int> &data) {
-    std::vector<Node> large, small;
-    large.reserve(data.size() / 2);
-    small.reserve(data.size() / 2 + data.size() % 2);
-    for (std::vector<int>::iterator it = data.begin(); it != data.end(); ++it)
+    // sort(large);
+    std::vector<int> tmp;
+    tmp.reserve(data.size());
+    std::vector<int>::iterator it_large = large.begin();
+    bool flag = true;
+    for (std::size_t n = 1; flag; n++)
     {
-       DEBUG_LINE();
-        std::vector<int>::iterator pre = it;
-        pre++;
-        if (pre == data.end())
+        std::size_t j = 2 * jacobsthal(n);
+        std::size_t i = 0;
+
+        while(i < j)
         {
-            small.push_back(Node(&(*pre)));
+            if (it_large == large.end())
+                break;
+            tmp.push_back(*it_large);
+            std::cout<<"__"<<*it_large<<std::endl;
+            i++;
+            it_large++;
+        }
+        if (i != j)
+            j = i;
+        if (i == 0 && data.size() % 2 != 0)
+        {
+            DEBUG_LINE();
+            tmp.push_back(smallArr[data.size() / 2]);
+        }
+        if(i == 0)
             break;
-        }
-        if (*pre < *it)
+        i = 0;
+        while(i < j && flag)
         {
-            small.push_back(Node(&(*pre)));
-            large.push_back(Node(&(*it)));
+            it_large--; 
+            Node* targetNode = nullptr;
+            for (Node* node : nodes)
+            {
+                if (node->n == *it_large) 
+                {
+                    targetNode = node;
+                    break;
+                }
+            }
+            if (targetNode == nullptr)
+            {
+                flag = false;
+                break;
+            }
+            tmp.push_back(*(targetNode->pop));
+                // std::cout<<"__"<<*targetNode->pop<<std::endl;
+            i++;
         }
-        else
-        {
-            small.push_back(Node(&(*it)));
-            large.push_back(Node(&(*pre)));
-        }
+        it_large += j;
+
     }
-    sort(large);
+        for (size_t i = 0; i < tmp.size(); ++i)
+    {
+        std::cout << tmp[i] << " ";
+    }
+    data.swap(tmp);
 }
 
 
 int main(int argc, char** argv) {
     std::vector<int> vec;
-    // std::list<int> list;
+    // std::vector<int> vector;
 
     if(argc <= 1)
         return 0;
@@ -117,7 +162,7 @@ int main(int argc, char** argv) {
         }
 
         vec.push_back(static_cast<int>(num));
-        // list.push_back(static_cast<int>(num));
+        // vector.push_back(static_cast<int>(num));
     }
 
     std::cout << "Before: ";
@@ -129,20 +174,20 @@ int main(int argc, char** argv) {
 
     clock_t startVec = clock();
     
-    mergeInsertSortVector(vec);
+    sort(vec);
     clock_t endVec = clock();
     double timeVec = static_cast<double>(endVec - startVec) / CLOCKS_PER_SEC * 1000000; // Microseconds
     //CLOCKS_PER_SECは1秒間に進むプロセッサのクロック数
     // clock_t startDeq = clock();
-    // mergeInsertmergeInsertSortVectorDeque(list);
+    // mergeInsertmergeInsertSortVectorDeque(vector);
     // clock_t endDeq = clock();
     // double timeDeq = static_cast<double>(endDeq - startDeq) / CLOCKS_PER_SEC * 1000000; // Microseconds
 
-    std::cout << "After: ";
-    for (size_t i = 0; i < vec.size(); ++i) 
-    {
-        std::cout << vec[i] << " ";
-    }
+    // std::cout << "After: ";
+    // for (size_t i = 0; i < vec.size(); ++i) 
+    // {
+    //     std::cout << vec[i] << " ";
+    // }
     std::cout << "\n";
 
     std::cout << "Time to process a range of " << vec.size() << " elements with std::vector: " << timeVec << " us\n";

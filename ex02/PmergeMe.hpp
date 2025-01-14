@@ -6,94 +6,20 @@
 #include <list>
 #include <vector>
 
-// 関数プロトタイプ
-unsigned long getTime();
-unsigned long jacobsthal(unsigned long);
+#include <iostream>
 
-void PmergeMe(int *data, std::size_t size);
-
-// Node クラス（int 型専用）
+// Node クラスの定義
 class Node {
-private:
-  bool _isLeaf;          // 葉ノードかどうかを示すフラグ
-  union Value {          // 値を保持するためのユニオン
-    int *leaf;           // 葉ノードの値
-    Node *inner;         // 内部ノードのポインタ
-  } _value;
-  Node *_pair;           // ペアとなるノード
-
 public:
-  // コンストラクタ（int* を受け取る）
-  explicit Node(int *value) : _isLeaf(true), _pair(nullptr) {
-    _value.leaf = value;
-  }
+    int n;       // 値を格納するメンバ変数
+    int* pop;   // 次の Node のアドレスを格納するメンバ変数
 
-  // コンストラクタ（Node* を受け取る）
-  explicit Node(Node *value) : _isLeaf(false), _pair(nullptr) {
-    _value.inner = value;
-  }
-
-  // コピーコンストラクタ
-  Node(Node const &rhs) : _isLeaf(rhs._isLeaf), _pair(rhs._pair) {
-    if (rhs._isLeaf)
-      _value.leaf = rhs._value.leaf;
-    else
-      _value.inner = rhs._value.inner;
-  }
-
-  // デストラクタ
-  ~Node() {}
-
-  // ペアが存在するかどうか
-  bool hasPair() const {
-    return _pair != nullptr;
-  }
-
-  // ペアを設定
-  void push(Node *node) {
-    _pair = node;
-  }
-
-  // ペアを取得して解除
-  Node *pop() {
-    Node *tmp = _pair;
-    _pair = nullptr;
-    return tmp;
-  }
-
-  // 代表値を取得
-  int &getTypical() const {
-    if (_isLeaf)
-      return *_value.leaf;
-    else
-      return _value.inner->getTypical();
-  }
-
-  // 比較演算子
-  bool operator<(Node const &rhs) const {
-    return getTypical() < rhs.getTypical();
-  }
-
-  // 値を取得（int* 用）
-  void getValue(int *&value) {
-    value = _value.leaf;
-  }
-
-  // 値を取得（Node* 用）
-  void getValue(Node *&value) {
-    value = _value.inner;
-  }
+    // コンストラクタ
+    // 引数 val を n に設定し、pop は nullptr に初期化する
+    Node(int val)
+        : n(val), pop(nullptr)
+    {
+    }
 };
 
-// データを出力する関数
-
-// void printData(ConstIterator begin, ConstIterator end) {
-//   if (begin != end) {
-//     std::cout << *begin;
-//     while (++begin != end)
-//       std::cout << " " << *begin;
-//   }
-//   std::cout << std::endl;
-// };
-
-#endif
+#endif // NODE_HPP

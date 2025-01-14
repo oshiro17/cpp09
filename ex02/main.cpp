@@ -67,7 +67,7 @@ for (std::vector<int>::iterator it = data.begin(); it != data.end(); )
     if (pre == data.end()) {
         smallArr[i] = *it;
         i++;
-        break; // ループ終了
+        break; 
     }
 
     if (*pre < *it)
@@ -87,7 +87,7 @@ for (std::vector<int>::iterator it = data.begin(); it != data.end(); )
         nodes.push_back(newNode);
     }
     i++;
-    it += 2; // ペアを1つ消費
+    it += 2; 
 }
 
     sort(large);

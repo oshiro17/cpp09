@@ -27,14 +27,31 @@ unsigned long jacobsthal(unsigned long i) {
     return buf[i];
 }
 //J(n) = 2 * J(n-2) + J(n-1)
-// void printData(const std::vector<Node> &data) {
-//     for (size_t i = 0; i < data.size(); ++i) {
-//         std::cout << data[i].getTypical();
-//         if (i != data.size() - 1)
-//             std::cout << " ";
-//     }
-//     std::cout << std::endl;
-// }
+void printData(const std::vector<int> &data) {
+    for (size_t i = 0; i < data.size(); ++i) {
+        std::cout << data[i];
+        if (i != data.size() - 1)
+            std::cout << " ";
+    }
+    std::cout << std::endl;
+}
+int getPop(std::vector<int>::iterator it, std::vector<Node*> &nodes)
+{
+    for (Node* node : nodes)
+    {
+        if (node->n == *it)
+        {
+            return *(node->pop);
+        }
+    }
+    return 0;
+}
+void insertInOrder(std::vector<int> &tmp, int sml_pair)
+{
+    // std::lower_boundで「sml_pair以上の要素が最初に現れる位置」を探す
+    std::vector<int>::iterator pos = std::lower_bound(tmp.begin(), tmp.end(), sml_pair);
+    tmp.insert(pos, sml_pair);
+}
 
 void sort(std::vector<int> &data)
 {
@@ -48,46 +65,43 @@ for (std::vector<int>::iterator it = data.begin(); it != data.end(); )
 {
     std::vector<int>::iterator pre = it + 1;
     if (pre == data.end()) {
-        // 奇数個の最後の1つが余った場合、smallに入れる
         smallArr[i] = *it;
         i++;
         break; // ループ終了
     }
 
-    // ここで 2つ1組の比較
     if (*pre < *it)
     {
-        // small = *pre, large = *it
         smallArr[i] = *pre;
         large.push_back(*it);
-
-        // Nodeを作り、pop先として smallArr[i] のアドレスを設定
         Node* newNode = new Node(*it);
         newNode->pop = &smallArr[i];
-
         nodes.push_back(newNode);
     }
     else
     {
-        // small = *it, large = *pre
         smallArr[i] = *it;
         large.push_back(*pre);
-
         Node* newNode = new Node(*pre);
         newNode->pop = &smallArr[i];
-
         nodes.push_back(newNode);
     }
-
     i++;
     it += 2; // ペアを1つ消費
 }
 
-    // sort(large);
+    sort(large);
     std::vector<int> tmp;
     tmp.reserve(data.size());
     std::vector<int>::iterator it_large = large.begin();
     bool flag = true;
+
+    // 普通に最初のペア入れる
+    // tmp.push_back(smallArr[0]);
+    tmp.push_back(getPop(it_large, nodes));
+    tmp.push_back(*it_large);
+    it_large++;
+
     for (std::size_t n = 1; flag; n++)
     {
         std::size_t j = 2 * jacobsthal(n);
@@ -98,7 +112,6 @@ for (std::vector<int>::iterator it = data.begin(); it != data.end(); )
             if (it_large == large.end())
                 break;
             tmp.push_back(*it_large);
-            std::cout<<"__"<<*it_large<<std::endl;
             i++;
             it_large++;
         }
@@ -106,7 +119,6 @@ for (std::vector<int>::iterator it = data.begin(); it != data.end(); )
             j = i;
         if (i == 0 && data.size() % 2 != 0)
         {
-            DEBUG_LINE();
             tmp.push_back(smallArr[data.size() / 2]);
         }
         if(i == 0)
@@ -114,32 +126,17 @@ for (std::vector<int>::iterator it = data.begin(); it != data.end(); )
         i = 0;
         while(i < j && flag)
         {
-            it_large--; 
-            Node* targetNode = nullptr;
-            for (Node* node : nodes)
-            {
-                if (node->n == *it_large) 
-                {
-                    targetNode = node;
-                    break;
-                }
-            }
-            if (targetNode == nullptr)
-            {
-                flag = false;
-                break;
-            }
-            tmp.push_back(*(targetNode->pop));
+            it_large--;
+            int sml_pair=getPop(it_large, nodes);
+            insertInOrder(tmp, sml_pair);
+            // tmp.push_back(sml_pair);
                 // std::cout<<"__"<<*targetNode->pop<<std::endl;
             i++;
         }
         it_large += j;
 
     }
-        for (size_t i = 0; i < tmp.size(); ++i)
-    {
-        std::cout << tmp[i] << " ";
-    }
+
     data.swap(tmp);
 }
 
@@ -183,11 +180,11 @@ int main(int argc, char** argv) {
     // clock_t endDeq = clock();
     // double timeDeq = static_cast<double>(endDeq - startDeq) / CLOCKS_PER_SEC * 1000000; // Microseconds
 
-    // std::cout << "After: ";
-    // for (size_t i = 0; i < vec.size(); ++i) 
-    // {
-    //     std::cout << vec[i] << " ";
-    // }
+    std::cout << "After: ";
+    for (size_t i = 0; i < vec.size(); ++i) 
+    {
+        std::cout << vec[i] << " ";
+    }
     std::cout << "\n";
 
     std::cout << "Time to process a range of " << vec.size() << " elements with std::vector: " << timeVec << " us\n";

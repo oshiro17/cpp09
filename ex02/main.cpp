@@ -6,6 +6,7 @@
 #include <climits> // For INT_MAX
 #include <vector>
 #include "PmergeMe.hpp"
+int steps = 0; // 二分探索の総回数を記録するやtう
 #define DEBUG_LINE() std::cerr << "Reached line " << __LINE__ << std::endl;
 
 unsigned long jacobsthal(unsigned long i) {
@@ -46,12 +47,30 @@ int getPop(std::vector<int>::iterator it, std::vector<Node*> &nodes)
     }
     return 0;
 }
+// void insertInOrder(std::vector<int> &tmp, int sml_pair)
+// {
+//     // std::lower_boundで「sml_pair以上の要素が最初に現れる位置」を探す
+//     std::vector<int>::iterator pos = std::lower_bound(tmp.begin(), tmp.end(), sml_pair);
+//     tmp.insert(pos, sml_pair);
+// }
 void insertInOrder(std::vector<int> &tmp, int sml_pair)
 {
-    // std::lower_boundで「sml_pair以上の要素が最初に現れる位置」を探す
-    std::vector<int>::iterator pos = std::lower_bound(tmp.begin(), tmp.end(), sml_pair);
-    tmp.insert(pos, sml_pair);
+    int left = 0;
+    int right = static_cast<int>(tmp.size());
+
+    while (left < right)
+    {
+        int mid = left + (right - left) / 2;
+        if (tmp[mid] < sml_pair)
+            left = mid + 1;
+        else
+            right = mid;
+        steps++;
+    }
+    tmp.insert(tmp.begin() + left, sml_pair);
 }
+
+
 
 void sort(std::vector<int> &data)
 {
@@ -61,35 +80,34 @@ void sort(std::vector<int> &data)
     int smallArr[(data.size() / 2) + (data.size() % 2)];
     std::vector<Node*> nodes;
     int i = 0;
-for (std::vector<int>::iterator it = data.begin(); it != data.end(); )
-{
-    std::vector<int>::iterator pre = it + 1;
-    if (pre == data.end()) {
-        smallArr[i] = *it;
+    for (std::vector<int>::iterator it = data.begin(); it != data.end(); )
+    {
+        std::vector<int>::iterator pre = it + 1;
+        if (pre == data.end()) {
+            smallArr[i] = *it;
+            i++;
+            break; 
+        }
+
+        if (*pre < *it)
+        {
+            smallArr[i] = *pre;
+            large.push_back(*it);
+            Node* newNode = new Node(*it);
+            newNode->pop = &smallArr[i];
+            nodes.push_back(newNode);
+        }
+        else
+        {
+            smallArr[i] = *it;
+            large.push_back(*pre);
+            Node* newNode = new Node(*pre);
+            newNode->pop = &smallArr[i];
+            nodes.push_back(newNode);
+        }
         i++;
-        break; 
+        it += 2; 
     }
-
-    if (*pre < *it)
-    {
-        smallArr[i] = *pre;
-        large.push_back(*it);
-        Node* newNode = new Node(*it);
-        newNode->pop = &smallArr[i];
-        nodes.push_back(newNode);
-    }
-    else
-    {
-        smallArr[i] = *it;
-        large.push_back(*pre);
-        Node* newNode = new Node(*pre);
-        newNode->pop = &smallArr[i];
-        nodes.push_back(newNode);
-    }
-    i++;
-    it += 2; 
-}
-
     sort(large);
     std::vector<int> tmp;
     tmp.reserve(data.size());
@@ -104,7 +122,12 @@ for (std::vector<int>::iterator it = data.begin(); it != data.end(); )
 
     for (std::size_t n = 1; flag; n++)
     {
-        std::size_t j = 2 * jacobsthal(n);
+        // std::size_t j = 2 * jacobsthal(n);
+
+        // jacobsthalとか使わずのでばぐ
+        std::size_t j= 1;
+        (void)n;
+
         std::size_t i = 0;
 
         while(i < j)
@@ -118,9 +141,7 @@ for (std::vector<int>::iterator it = data.begin(); it != data.end(); )
         if (i != j)
             j = i;
         if (i == 0 && data.size() % 2 != 0)
-        {
-            tmp.push_back(smallArr[data.size() / 2]);
-        }
+            insertInOrder(tmp, smallArr[data.size() / 2]); 
         if(i == 0)
             break;
         i = 0;
@@ -129,21 +150,16 @@ for (std::vector<int>::iterator it = data.begin(); it != data.end(); )
             it_large--;
             int sml_pair=getPop(it_large, nodes);
             insertInOrder(tmp, sml_pair);
-            // tmp.push_back(sml_pair);
-                // std::cout<<"__"<<*targetNode->pop<<std::endl;
             i++;
         }
         it_large += j;
-
     }
-
     data.swap(tmp);
 }
 
 
 int main(int argc, char** argv) {
     std::vector<int> vec;
-    // std::vector<int> vector;
 
     if(argc <= 1)
         return 0;
@@ -159,14 +175,15 @@ int main(int argc, char** argv) {
         }
 
         vec.push_back(static_cast<int>(num));
-        // vector.push_back(static_cast<int>(num));
     }
+     std::cout << "jacobsthalとか使わず" << std::endl;
+    //  std::cout << "jacobsthal使って" << std::endl;
 
-    std::cout << "Before: ";
-    for (size_t i = 0; i < vec.size(); ++i)
-    {
-        std::cout << vec[i] << " ";
-    }
+    // std::cout << "Before: ";
+    // for (size_t i = 0; i < vec.size(); ++i)
+    // {
+    //     std::cout << vec[i] << " ";
+    // }
     std::cout << "\n";
 
     clock_t startVec = clock();
@@ -189,6 +206,7 @@ int main(int argc, char** argv) {
 
     std::cout << "Time to process a range of " << vec.size() << " elements with std::vector: " << timeVec << " us\n";
     // std::cout << "Time to process a range of " << deq.size() << " elements with std::deque: " << timeDeq << " us\n";
+    std::cout << "二分探索の合計は！: " << steps << std::endl;
 
     return 0;
 }
